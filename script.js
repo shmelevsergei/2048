@@ -28,9 +28,13 @@ buttonStartClick();
 
 function buttonLooseClick() {
    buttonLoose.addEventListener('click', () => {
-      windowLoose.classList.remove('_show');
       gameBoard.style.display = "grid";
       controllers.style.display = "block";
+      location.reload();
+      setTimeout(() => {
+         windowLoose.classList.remove('_show');
+      }, 2000);
+
    })
 }
 
@@ -43,7 +47,6 @@ async function generateNewTile() {
       controllers.style.display = "none";
       windowLoose.classList.add('_show');
       buttonLooseClick();
-      location.reload();
       return;
    }
 
