@@ -1,16 +1,89 @@
 import { Grid } from "./grid.js";
 import { Tile } from "./tile.js";
+import { controllers, buttonUp, buttonLeft, buttonRight, buttonDown, buttonStart, windowStart, buttonLoose, windowLoose } from "./controllers.js";
 
-const gameBoard = document.getElementById('game-board');
+const gameBoard = document.querySelector('.game-board');
+controllers.style.display = "none";
 
 const grid = new Grid(gameBoard);
-grid.getRandomEmptyCell().linkTile(new Tile(gameBoard));
-grid.getRandomEmptyCell().linkTile(new Tile(gameBoard));
-setupInputOnce();
+function generateGrid() {
+   grid.getRandomEmptyCell().linkTile(new Tile(gameBoard));
+   grid.getRandomEmptyCell().linkTile(new Tile(gameBoard));
+   setupInputOnce();
+}
+generateGrid();
 
 function setupInputOnce() {
    window.addEventListener("keydown", handleInput, { once: true });
 }
+
+function buttonStartClick() {
+   buttonStart.addEventListener('click', () => {
+      windowStart.classList.add('_show');
+      gameBoard.style.display = "grid";
+      controllers.style.display = "block";
+   })
+}
+buttonStartClick();
+
+function buttonLooseClick() {
+   buttonLoose.addEventListener('click', () => {
+      windowLoose.classList.remove('_show');
+      gameBoard.style.display = "grid";
+      controllers.style.display = "block";
+   })
+}
+
+async function generateNewTile() {
+   const newTile = new Tile(gameBoard);
+   grid.getRandomEmptyCell().linkTile(newTile);
+
+   if (!canMoveUp() && !canMoveDown() && !canMoveLeft() && !canMoveRight()) {
+      await newTile.waitForAnimationEnd();
+      controllers.style.display = "none";
+      windowLoose.classList.add('_show');
+      buttonLooseClick();
+      location.reload();
+      return;
+   }
+
+   setupInputOnce();
+}
+
+buttonUp.addEventListener('click', () => {
+   if (!canMoveUp()) {
+      setupInputOnce();
+      return;
+   }
+   moveUp();
+   generateNewTile();
+
+})
+buttonLeft.addEventListener('click', () => {
+   if (!canMoveLeft()) {
+      setupInputOnce();
+      return;
+   }
+   moveLeft();
+   generateNewTile();
+})
+buttonRight.addEventListener('click', () => {
+   if (!canMoveRight()) {
+      setupInputOnce();
+      return;
+   }
+   moveRight();
+   generateNewTile();
+})
+buttonDown.addEventListener('click', () => {
+   if (!canMoveDown()) {
+      setupInputOnce();
+      return;
+   }
+   moveDown();
+   generateNewTile();
+})
+
 
 async function handleInput(event) {
    switch (event.key) {
@@ -48,16 +121,7 @@ async function handleInput(event) {
          return;
    }
 
-   const newTile = new Tile(gameBoard);
-   grid.getRandomEmptyCell().linkTile(newTile);
-
-   if (!canMoveUp() && !canMoveDown() && !canMoveLeft() && !canMoveRight()) {
-      await newTile.waitForAnimationEnd();
-      alert("Try again");
-      return;
-   }
-
-   setupInputOnce();
+   await generateNewTile();
 }
 
 async function moveUp() {
